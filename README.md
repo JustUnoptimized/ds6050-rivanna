@@ -146,7 +146,7 @@ Great! You've managed to get into Rivanna. You will now need some additional set
 
 I suggest setting up a virtual environment and installing all packages there. You can then set up that virtual environment as the Jupyter kernel for running your code. Instructions below:
 
-0. Download the supplied `requirements.txt` file and place it into your home directory.
+0. Download the supplied [requirements.txt](requirements.txt) file and place it into your home directory.
 1. Open up a terminal (either through Open OnDemand JupyterLab, or Code Server, or your SSH connection) and navigate to your home directory.
 2. Run the command `module load miniforge/24.11.3-py3.12` which gives you access to the conda environment manager.
 3. Run the command `conda create -n dsvenv python=3.12` and follow any subsequent instructions to set up a virtual environment named `dsvenv` running python 3.12. You can ignore any warnings about updating conda.
