@@ -1,0 +1,5 @@
+# Ignore the actual venv
+dsvenv/
+
+# ignore temp file
+.ipynb_checkpoints/
