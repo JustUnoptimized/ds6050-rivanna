@@ -151,7 +151,8 @@ I suggest setting up a virtual environment and installing all packages there. Yo
 2. Run the command `module load miniforge/24.11.3-py3.12` which gives you access to the conda environment manager.
 3. Run the command `conda create -n dsvenv python=3.12` and follow any subsequent instructions to set up a virtual environment named `dsvenv` running python 3.12. You can ignore any warnings about updating conda.
 4. Activate the virtual environment using `conda activate dsvenv`. Your terminal should now show an additional `(dsvenv)` to indicate the active virtual environment.
-5. Run `pip install -r requirements.txt` to install the appropriate packages.
+5. Move to the cloned GitHub repository using `cd ds6050-rivanna`.
+6. Run `pip install -r requirements.txt` to install the appropriate packages.
 
 At this point, you are able to run python scripts which use any of the packages in the `requirements.txt` file.[^venvnote] The next step will allow you to access this virtual environment for your Jupyter Notebooks.
 
