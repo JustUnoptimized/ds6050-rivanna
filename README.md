@@ -4,9 +4,9 @@ Justin Lee
 
 jgh2xh@virginia.edu
 
-Last modified 2025-08-27
+Last modified 2025-10-02
 
-Version 0.0.1
+Version 0.0.2
 
 ---------------------
 
@@ -124,7 +124,85 @@ which means you have successfully gotten the compute resources![^ijobnote] This 
 #### Slurm Batch Jobs
 Typically the `ijob`s above are used for drafting and debugging code. When you are ready to send everything for heavy/long training, you should consider using a batch job. Unlike `ijob`s, you do not need to keep your connection to Rivanna alive. Once you submit the job, Slurm will automatically handle running the code in the background so you can basically fire-and-forget. You can even submit multiple jobs at the same time to, for instance, speed up a hyperparameter search or ablation study!
 
-Instructions on how to do this will be added soon...
+Submitting jobs through slurm require setting up a Bash script containing the relevant flags and options. This includes things like the allocation, max walltime (and slurm will automatically kill jobs which exceed this limit), cpu/gpu, where to save printed output, etc.
+
+You can actually separate output by regular output and error output, which may be useful in de-cluttering any printed outputs. They correspond respectively to output streams called `stdout` and `stderr`.
+
+I will provide a very basic script and detail what each line means. Like I mentioned above, feel free to customize your own script. Also, please read the HPC slurm overview linked at the top of the document for a much more in-depth description of submitting slurm jobs.
+
+```bash
+#!/bin/bash
+
+# the above bin/bash line is required to be at the top of your bash script
+
+## Set slurm options and flags
+#SBATCH -A shakeri_ds6050               # your allocation
+#SBATCH -p gpu                          # use standard for cpu, gpu for gpu
+#SBATCH --gres=gpu:1                    # required if using gpu. Can optionally choose a desired gpu
+#SBATCH --ntasks=1                      # number of tasks
+#SBATCH --nodes=1                       # number of nodes
+#SBATCH --mem=64G                       # Amount of memory to allocate for the job
+#SBATCH -c 1                            # cpus per task
+#SBATCH -t 72:00:00                     # max wall clock time. 3 days is the limit for gpus. 7 days for cpus.
+#SBATCH -o ./slurmlogs/train_%A_%a.out  # stdout output file
+#SBATCH -e ./slurmlogs/train_%A_%a.err  # stderr output file
+
+# For the output files, %A refers to the job id (assigned by slurm)
+#                       %a refers to the array index (applicable if you submit an array job)
+# If the job id is 1234 and there is no array index
+# the outfile should be saved to <current directory>/slurmlogs/train_1234_.out
+# Just to be safe, make sure the path to the output files exist
+# which in this case means that the directory <current directory>/slurmlogs/ should exist.
+
+## set up environment and python executable
+CONDA_ENV_PATH="/path/to/dsvenv"
+PIP_EX="$CONDA_ENV_PATH/bin/pip"
+PYTHON_EX="$CONDA_ENV_PATH/bin/python"
+
+## Gather current slurm job info
+now=$(date -Iseconds)
+wallclock=$(squeue -h -j $SLURM_ARRAY_JOB_ID -o %l)
+gpuname=$(nvidia-smi --query-gpu=name --format=csv,noheader)
+
+## print current slurm job info to stdout (and therefore train.out)
+printf "\n\n======================================\n"
+printf "[ JOB ID ]     : $SLURM_ARRAY_JOB_ID\n"
+printf "[ ARRAY ID ]   : $SLURM_ARRAY_TASK_ID\n"
+printf "[ WALLCLOCK  ] : $wallclock\n"
+printf "[ START TIME ] : $now\n"
+printf "[ GPU ]        : $gpuname\n\n"
+
+## print current slurm job info to stderr (and therefore train.err)
+printf "\n\n======================================\n" >&2
+printf "[ JOB ID ]     : $SLURM_ARRAY_JOB_ID\n" >&2
+printf "[ ARRAY ID ]   : $SLURM_ARRAY_TASK_ID\n" >&2
+printf "[ WALLCLOCK  ] : $wallclock\n" >&2
+printf "[ START TIME ] : $now\n" >&2
+printf "[ GPU ]        : $gpuname\n\n" >&2
+
+
+# script to run your python script here
+
+# For example, suppose I had a python script called trainmodel.py
+$PYTHON_EX trainmodel.py
+
+# $PYTHON_EX gets the value stored in the variable PYTHON_EX
+# which in this case will expand to /path/to/dsvenv/bin/python
+# so the full command that gets executed is:
+# /path/to/dsvenv/bin/python trainmodel.py
+```
+
+Now suppose this script is called `runner.slurm`, located at `/scratch/<computing id>/ds6050/`. Also suppose I have the directory `slurmlogs/`. Execute the script using the command
+```
+# make sure you are located at /scratch/<computing id>/ds6050
+./runner.slurm
+```
+which should output something like
+```
+Submitted batch job 1234
+```
+
+It might take some time for slurm to actually run the script, but once it does, you should see the files `train_1234_.out` and `train_1234_.err` inside `slurmlogs/`. Make sure to check the error file once in a while to make sure no bugs or errors came up in your code (or job submit). I've had times where I thought the job was successfully submitted, only to check the next day that there was some error in my submit script...
 
 ## Rivanna Directory Structure
 When storing files in Rivanna, you will typically have access to two major partitions: `HOME` and `SCRATCH`. Both locations should be private--only you can access, read, and write files in your allocated `HOME` and `SCRATCH` spaces. Their purposes are somewhat self-explanatory.
