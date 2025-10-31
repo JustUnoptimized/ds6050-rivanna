@@ -1,6 +1,5 @@
 #!/bin/bash
-
-# the above bin/bash line is required to be at the top of your bash script
+# The above bin/bash line is required to be at the top of your bash script
 
 ## Set slurm options and flags
 #SBATCH -A shakeri_ds6050               # your allocation
@@ -21,7 +20,10 @@
 # Just to be safe, make sure the path to the output files exist
 # which in this case means that the directory <current directory>/slurmlogs/ should exist.
 
-## set up environment and python executable
+## Exit on error
+set -euo pipefail
+
+## Set up environment and python executable
 CONDA_ENV_PATH="/path/to/dsvenv"
 PIP_EX="$CONDA_ENV_PATH/bin/pip"
 PYTHON_EX="$CONDA_ENV_PATH/bin/python"
@@ -47,13 +49,14 @@ printf "[ WALLCLOCK  ] : $wallclock\n" >&2
 printf "[ START TIME ] : $now\n" >&2
 printf "[ GPU ]        : $gpuname\n\n" >&2
 
-
-# script to run your python script here
-
-# For example, suppose I had a python script called trainmodel.py
+## Run your python script here.
+## For example, suppose I had a python script called trainmodel.py
 $PYTHON_EX trainmodel.py
 
-# $PYTHON_EX gets the value stored in the variable PYTHON_EX
-# which in this case will expand to /path/to/dsvenv/bin/python
-# so the full command that gets executed is:
-# /path/to/dsvenv/bin/python trainmodel.py
+## $PYTHON_EX gets the value stored in the variable PYTHON_EX
+## which in this case will expand to /path/to/dsvenv/bin/python
+## so the full command that gets executed is:
+## /path/to/dsvenv/bin/python trainmodel.py
+
+## Submit this script from the terminal using the command:
+## sbatch runner.slurm

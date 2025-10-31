@@ -195,7 +195,7 @@ $PYTHON_EX trainmodel.py
 Now suppose this script is called `runner.slurm`, located at `/scratch/<computing id>/ds6050/`. Also suppose I have the directory `slurmlogs/`. Execute the script using the command
 ```
 # make sure you are located at /scratch/<computing id>/ds6050
-./runner.slurm
+sbatch runner.slurm
 ```
 which should output something like
 ```
